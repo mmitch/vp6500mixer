@@ -1,16 +1,24 @@
-#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <sys/soundcard.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
-#define MAXLEVEL 100
+#include "aic14_ioctl.h"
+
+#define MAXLEVEL 255
+#define AIC14_DEV "/dev/aic14"
+
+static u_int8_t bytereg[4];
 
 int main(int argc, char *argv[])
 {
-	int mixer_fd  = -1;
-	int err       = -1;
-	int device    = SOUND_MIXER_VOLUME;
+	int aic14_fd  = -1;
 	int vol       = -1;
+
+	bytereg[0]    = 0;
+	bytereg[1]    = 0;
+	bytereg[2]    = 0;
+	bytereg[3]    = 0;
 
 	if (argc == 2) {
 
@@ -22,26 +30,23 @@ int main(int argc, char *argv[])
 			if (vol > MAXLEVEL) {
 				vol = MAXLEVEL;
 			}
-			vol = vol + (vol << 8);
+			bytereg[0] = vol;
 
-			if (! ((mixer_fd = open("/dev/mixer1", O_WRONLY)) < 0)) {
+			if (! ((aic14_fd = open(AIC14_DEV, O_WRONLY)) < 0)) {
 				
-				if (ioctl(mixer_fd, MIXER_WRITE(SOUND_MIXER_VOLUME), &vol) == -1) {
-					fprintf(stderr, "err: MIXER_WRITE ioctl to VOLUME failed\n");
-				}
-				if (ioctl(mixer_fd, MIXER_WRITE(SOUND_MIXER_SPEAKER), &vol) == -1) {
-					fprintf(stderr, "err: MIXER_WRITE ioctl to SPEAKER failed\n");
+				if (ioctl(aic14_fd, AIC14_SET_DAC_GAIN, bytereg) == -1) {
+					fprintf(stderr, "err: AIC14_SET_DAC_GAIN ioctl failed\n");
 				}
 				
-				close(mixer_fd);
+				close(aic14_fd);
 			} else {
-				fprintf(stderr, "err: /dev/mixer1 not opened\n");
+				perror("err: " AIC14_DEV " not opened");
 			}
 		} else {
 			fprintf(stderr, "err: could not parse volume: <%s>\n", argv[1]);
 		}
 	} else {
-		fprintf(stderr, "err: enter volume as first argument\n");
+		fprintf(stderr, "err: enter volume as first argument (range 0-255)\n");
 	}
 
 	return 0;
