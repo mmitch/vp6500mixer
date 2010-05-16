@@ -30,14 +30,29 @@ int main(int argc, char *argv[])
 			if (vol > MAXLEVEL) {
 				vol = MAXLEVEL;
 			}
-			bytereg[0] = vol;
 
 			if (! ((aic14_fd = open(AIC14_DEV, O_WRONLY)) < 0)) {
-				
+#ifdef DEBUG				
+				if (ioctl(aic14_fd, AIC14_GET_DAC_GAIN, bytereg) == -1) {
+					fprintf(stderr, "err: AIC14_GET_DAC_GAIN ioctl failed\n");
+				} else {
+					printf("DAC Gain before:  %8X (%5i dB)\n", bytereg[0], -42 + bytereg[0]);
+				}
+#endif				
+
+				bytereg[0] = vol;
 				if (ioctl(aic14_fd, AIC14_SET_DAC_GAIN, bytereg) == -1) {
 					fprintf(stderr, "err: AIC14_SET_DAC_GAIN ioctl failed\n");
 				}
-				
+
+#ifdef DEBUG				
+				if (ioctl(aic14_fd, AIC14_GET_DAC_GAIN, bytereg) == -1) {
+					fprintf(stderr, "err: AIC14_GET_DAC_GAIN ioctl failed\n");
+				} else {
+					printf("DAC Gain after:   %8X (%5i dB)\n", bytereg[0], -42 + bytereg[0]);
+				}
+#endif				
+
 				close(aic14_fd);
 			} else {
 				perror("err: " AIC14_DEV " not opened");
