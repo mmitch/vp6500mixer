@@ -1,0 +1,27 @@
+vp6500mixer - sound mixer utility für Philips VP6500 VoIP phone
+
+Copyright (C) 2010  Christian Garbs <mitch@cgarbs.de>
+licensed under GNU GPL v2 or later
+
+
+build instructions
+------------------
+
+1) Get a crosscompile environment, for example this:
+   http://www.handhelds.org/download/projects/toolchain/arm-linux-gcc-3.3.2.tar.bz2
+   
+   Extract to /opt/VP5500/toolchain and set a symlink as described here:
+   http://www.mikrocontroller.net/articles/PHILIPS_VP5500_VoIP_Telefon#Linux
+   $ ln -s /opt/VP5500/toolchain/usr/local/arm /usr/local/arm
+
+
+2) Edit bash.include to your needs (not needed if above tarball is
+   extracted and linked as instructed).
+
+
+3) Source bash.include:
+   $ . ./bash.include
+
+
+4) Simply run make:
+   $ make
